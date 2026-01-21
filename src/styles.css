@@ -134,6 +134,20 @@ h1 {
     font-weight: 400;
 }
 
+.export-link {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--accent-dark);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.export-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
 .user-meta {
     display: flex;
     align-items: center;
@@ -674,6 +688,8 @@ details.section .advanced {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--muted);
+    display: flex;
+    align-items: center;
 }
 
 .import-divider {
@@ -717,7 +733,9 @@ details.section .advanced {
     font-family: inherit;
     background: var(--bg);
     color: var(--ink);
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
 }
 
 .shikimori-form input[type="text"]:focus {
@@ -742,7 +760,10 @@ details.section .advanced {
     cursor: pointer;
     white-space: nowrap;
     box-shadow: 0 4px 12px rgba(243, 107, 74, 0.25);
-    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .shikimori-form button:hover:not(:disabled) {
