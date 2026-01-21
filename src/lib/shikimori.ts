@@ -2,7 +2,7 @@ import { AnimeEntry, AnimeListExport } from "./types";
 
 const API_BASE = "https://shikimori.one/api";
 const USER_AGENT = "AnimeRanker";
-const RATE_LIMIT_DELAY = 350; // 5rps limit = 200ms minimum, add buffer
+const RATE_LIMIT_DELAY = 350; // API limit: 5rps => 200ms minimum; use 350ms (~2.86rps) as a safety buffer
 
 type ShikimoriAnimeRate = {
   id: number;
