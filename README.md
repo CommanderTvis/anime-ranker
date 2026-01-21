@@ -1,28 +1,49 @@
-# Anime Ranker (React + Bun)
+# Anime Ranker
 
-Local React UI to rank anime from MAL exports with fast hotkeys and Elo math.
+[![Deploy to GitHub Pages](https://github.com/CommanderTvis/anime-ranker/actions/workflows/deploy.yml/badge.svg)](https://github.com/CommanderTvis/anime-ranker/actions/workflows/deploy.yml)
 
-## What it does
+Local React app to rank anime from MyAnimeList exports using Elo-style pairwise comparisons.
 
-1. Loads a MyAnimeList XML export (`.xml` or `.xml.gz`)
-2. Lets you rank anime via Elo-style “A vs B” comparisons
-3. Fits a Normal distribution to the resulting Elo ratings
-4. Converts each anime’s Elo to a discretized `1..10` score
-5. Exports results as CSV/JSON (optionally writes to disk via File System Access API)
+**[Try it live →](https://commandertvis.github.io/anime-ranker/)**
 
-## Run
+## Features
+
+- Load MyAnimeList XML exports (`.xml` or `.xml.gz`, decompressed in-browser)
+- Rank anime via "A vs B" comparisons with keyboard hotkeys
+- Fits a Normal distribution to Elo ratings
+- Converts Elo percentiles to discretized 1–10 scores
+- Blends Elo-derived scores with original MAL scores based on completion ratio and MAL score normality
+- Optional: place dropped anime below completed and skip cross-status comparisons
+- Export results as CSV or JSON
+- Fetches posters and English titles via Jikan API (no MAL OAuth required)
+
+## Run locally
 
 ```bash
 bun install
 bun run dev
 ```
 
-## Notes
+Opens at http://localhost:5173
 
-- `.gz` is decompressed in-browser.
-- The `1..10` score is computed by:
-  - fitting `(mu, sigma)` from all Elo values,
-  - computing each anime’s percentile with `NormalCDF((elo-mu)/sigma)`,
-  - mapping percentile → decile bucket `1..10`.
-- Optional posters/English titles use the public Jikan API (no MAL OAuth required).
-- Optional assumption: dropped titles are placed below non-dropped and comparisons between Completed/Dropped are skipped.
+## Build
+
+```bash
+bun run build
+bun run preview
+```
+
+## How scoring works
+
+1. Pairwise comparisons update Elo ratings
+2. A Normal distribution `(μ, σ)` is fitted to all Elo values
+3. Each anime's percentile is computed via `NormalCDF((elo - μ) / σ)`
+4. Percentiles map to decile buckets 1–10
+5. Final scores blend Elo-derived and MAL scores using:
+   - `eloWeight = completionRatio^(1 + (1 - malNormality))`
+   - Higher MAL normality → trust MAL scores more
+   - Fewer comparisons → trust MAL scores more
+
+## License
+
+[MIT](LICENSE) © 2026 Iaroslav (Rick) Postovalov
