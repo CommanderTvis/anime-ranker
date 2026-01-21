@@ -2,22 +2,26 @@
 
 ## Project Overview
 
-Anime Ranker is a local React application for ranking anime from MyAnimeList (MAL) exports using Elo-style pairwise comparisons. It converts subjective rankings into normalized 1-10 scores using statistical distribution fitting.
+Anime Ranker is a local React application for ranking anime from MyAnimeList (MAL) exports or Shikimori profiles using Elo-style pairwise comparisons. It converts subjective rankings into normalized 1-10 scores using statistical distribution fitting.
 
 ## Tech Stack
 
 - **Runtime**: Bun
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite 5
+- **Testing**: Vitest
 - **Styling**: Plain CSS (`src/styles.css`)
 
 ## Commands
 
 ```bash
-bun install      # Install dependencies
-bun run dev      # Start dev server on port 5173
-bun run build    # Production build
-bun run preview  # Preview production build
+bun install            # Install dependencies
+bun run dev            # Start dev server on port 5173
+bun run build          # Production build
+bun run preview        # Preview production build
+bun run test           # Run tests in watch mode
+bun run test:run       # Run tests once
+bun run test:integration  # Run Shikimori integration tests
 ```
 
 ## Project Structure
@@ -31,12 +35,14 @@ src/
 └── lib/
     ├── types.ts     # TypeScript interfaces (AnimeEntry, EloState, etc.)
     ├── mal.ts       # MAL XML export parser
+    ├── shikimori.ts # Shikimori API client for fetching user anime lists
     ├── elo.ts       # Elo rating system (createEloState, recordOutcome, selectPair)
     ├── scoring.ts   # Normal distribution fitting and percentile → 1-10 conversion
     ├── analysis.ts  # Statistical analysis (normality line, MAL score summary)
     ├── results.ts   # Result building and CSV/JSON export
     ├── jikan.ts     # Jikan API client for posters/English titles
-    └── random.ts    # Seeded random number generator
+    ├── random.ts    # Seeded random number generator
+    └── *.test.ts    # Unit tests for each module
 ```
 
 ## Key Concepts
@@ -54,5 +60,5 @@ src/
 
 ## File Formats
 
-- **Input**: MAL XML exports (`.xml` or `.xml.gz`, decompressed in-browser via pako)
+- **Input**: MAL XML exports (`.xml` or `.xml.gz`, decompressed in-browser via pako) or Shikimori username
 - **Output**: CSV or JSON results via File System Access API or download
