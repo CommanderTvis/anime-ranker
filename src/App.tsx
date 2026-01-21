@@ -1674,7 +1674,7 @@ const App = () => {
                                 </text>
                               );
                             })}
-                            {samples.map((s) => {
+                            {samples.map((s, idx) => {
                               const sampleScore = s.score1to10;
                               const x = Math.max(
                                 pad.l + 5,
@@ -1685,15 +1685,18 @@ const App = () => {
                               );
                               const y = scaleY(gaussian(sampleScore));
                               const shortTitle =
-                                s.title.length > 12
-                                  ? s.title.slice(0, 11) + "…"
+                                s.title.length > 8
+                                  ? s.title.slice(0, 7) + "…"
                                   : s.title;
+                              // Offset labels vertically to avoid overlap
+                              const labelOffsets = [-18, -6, -12];
+                              const labelY = y + labelOffsets[idx];
                               return (
                                 <g key={s.animeId}>
                                   <circle cx={x} cy={y} r={3} fill={s.color} />
                                   <text
                                     x={x}
-                                    y={y - 6}
+                                    y={labelY}
                                     className="bell-sample"
                                     fill={s.color}
                                   >
