@@ -1,5 +1,5 @@
 import pako from "pako";
-import { AnimeEntry, MALExport } from "./types";
+import { AnimeEntry, AnimeListExport } from "./types";
 
 const GZIP_MAGIC = [0x1f, 0x8b];
 
@@ -39,7 +39,7 @@ const getText = (parent: Element, tag: string): string | null => {
 export const parseMalExport = (
   data: Uint8Array,
   filename?: string
-): MALExport => {
+): AnimeListExport => {
   const xmlBytes = maybeDecompress(data, filename);
   const decoded = new TextDecoder("utf-8").decode(xmlBytes);
   const sanitized = decoded.replace(
@@ -77,8 +77,9 @@ export const parseMalExport = (
   entries.sort((a, b) => a.title.localeCompare(b.title));
 
   return {
+    source: "mal",
     userId,
     userName,
-    anime: entries
+    anime: entries,
   };
 };

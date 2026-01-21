@@ -8,11 +8,17 @@ export type AnimeEntry = {
   myScore: number | null;
 };
 
-export type MALExport = {
+export type AnimeListSource = "mal" | "shikimori";
+
+export type AnimeListExport = {
+  source: AnimeListSource;
   userId: number | null;
   userName: string | null;
   anime: AnimeEntry[];
 };
+
+/** @deprecated Use AnimeListExport instead */
+export type MALExport = AnimeListExport;
 
 export type Rating = {
   value: number;

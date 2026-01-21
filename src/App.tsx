@@ -17,12 +17,13 @@ import {
   percentile,
   score10FromPercentile,
 } from "./lib/scoring";
+import { fetchShikimoriAnimeList } from "./lib/shikimori";
 import {
   AnimeEntry,
+  AnimeListExport,
   AnimeMedia,
   AnimeResult,
   EloState,
-  MALExport,
   Rating,
 } from "./lib/types";
 
@@ -81,7 +82,7 @@ type StoredEloState = {
 
 type StoredState = {
   version: 1;
-  exportData: MALExport;
+  exportData: AnimeListExport;
   fileName: string | null;
   statusFilter: string[];
   showPosters: boolean;
@@ -202,8 +203,12 @@ const NormalityChart = ({
 
 const App = () => {
   const [hydrated, setHydrated] = useState(false);
-  const [exportData, setExportData] = useState<MALExport | null>(null);
+  const [exportData, setExportData] = useState<AnimeListExport | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [shikimoriUsername, setShikimoriUsername] = useState("");
+  const [shikimoriLoading, setShikimoriLoading] = useState(false);
+  const [shikimoriProgress, setShikimoriProgress] = useState("");
+  const [shikimoriError, setShikimoriError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [showPosters, setShowPosters] = useState(true);
   const [showEnglish, setShowEnglish] = useState(true);
@@ -429,11 +434,53 @@ const App = () => {
       const exportResult = parseMalExport(new Uint8Array(buffer), file.name);
       setExportData(exportResult);
       setFileName(file.name);
+      setShikimoriError(null);
       setMediaCache(new Map());
       rngRef.current = createRng(Date.now());
       resetRankingState();
     },
     [resetRankingState],
+  );
+
+  const handleShikimoriImport = useCallback(
+    async (username: string) => {
+      if (!username.trim()) {
+        setShikimoriError("Please enter a username");
+        return;
+      }
+      setShikimoriLoading(true);
+      setShikimoriError(null);
+      setShikimoriProgress("Connecting...");
+      try {
+        const result = await fetchShikimoriAnimeList(
+          username.trim(),
+          (loaded, status) => {
+            setShikimoriProgress(`${status} (${loaded} anime)`);
+          }
+        );
+        if (!result) {
+          setShikimoriError("User not found or API error");
+          return;
+        }
+        if (result.anime.length === 0) {
+          setShikimoriError("No anime found in this user's list");
+          return;
+        }
+        setExportData(result);
+        setFileName(`shikimori:${result.userName}`);
+        setMediaCache(new Map());
+        rngRef.current = createRng(Date.now());
+        resetRankingState();
+      } catch (err) {
+        setShikimoriError(
+          err instanceof Error ? err.message : "Failed to fetch"
+        );
+      } finally {
+        setShikimoriLoading(false);
+        setShikimoriProgress("");
+      }
+    },
+    [resetRankingState]
   );
 
   const startRanking = useCallback(() => {
@@ -1092,8 +1139,8 @@ const App = () => {
         <p className="eyebrow">Elo Anime Ranker</p>
         <h1>Rank your anime with pairwise comparisons</h1>
         <p className="lede">
-          Upload a MAL export, smash hotkeys, and let Elo build a balanced
-          ranking in minutes.
+          Import from MAL or Shikimori, smash hotkeys, and let Elo build a
+          balanced ranking in minutes.
         </p>
       </div>
     </header>
@@ -1107,22 +1154,58 @@ const App = () => {
         <aside className="sidebar">
           <div className="panel">
             <h2>Session setup</h2>
-            <label className="upload">
-              <input
-                type="file"
-                accept=".xml,.gz"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) {
-                    void handleFile(file);
-                  }
-                }}
-              />
-              <span>Upload MAL export</span>
-              <em>{fileName ?? "XML or XML.GZ"}</em>
-            </label>
+            <div className="import-tabs">
+              <div className="import-section">
+                <p className="section-title">MAL Export</p>
+                <label className="upload">
+                  <input
+                    type="file"
+                    accept=".xml,.gz"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        void handleFile(file);
+                      }
+                    }}
+                  />
+                  <span>Upload file</span>
+                  <em>XML or XML.GZ</em>
+                </label>
+              </div>
+              <div className="import-divider">or</div>
+              <div className="import-section">
+                <p className="section-title">Shikimori</p>
+                <form
+                  className="shikimori-form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void handleShikimoriImport(shikimoriUsername);
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Username"
+                    value={shikimoriUsername}
+                    onChange={(e) => setShikimoriUsername(e.target.value)}
+                    disabled={shikimoriLoading}
+                  />
+                  <button type="submit" disabled={shikimoriLoading}>
+                    {shikimoriLoading ? "..." : "Fetch"}
+                  </button>
+                </form>
+                {shikimoriProgress && (
+                  <em className="progress-text">{shikimoriProgress}</em>
+                )}
+                {shikimoriError && (
+                  <em className="error-text">{shikimoriError}</em>
+                )}
+              </div>
+            </div>
             {exportData && (
               <div className="user-meta">
+                <span className="source-badge">
+                  {exportData.source === "shikimori" ? "Shikimori" : "MAL"}
+                </span>
                 <span>
                   <strong>{exportData.userName || "unknown"}</strong>
                 </span>
@@ -1133,7 +1216,9 @@ const App = () => {
               </div>
             )}
             {!exportData && (
-              <p className="muted">Upload your MyAnimeList export to begin.</p>
+              <p className="muted">
+                Upload a MAL export or enter your Shikimori username to begin.
+              </p>
             )}
             {exportData && (
               <>
@@ -1295,7 +1380,7 @@ const App = () => {
         <main className="main">
           {!exportData && (
             <div className="panel empty">
-              <p>Upload a MAL export to unlock the ranking flow.</p>
+              <p>Import your anime list to unlock the ranking flow.</p>
             </div>
           )}
           {exportData && !settingsConfirmed && (
