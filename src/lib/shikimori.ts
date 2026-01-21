@@ -131,7 +131,18 @@ export const fetchShikimoriAnimeList = async (
         if (data.length < 50) {
           break;
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching Shikimori anime rates:", {
+          url,
+          status,
+          page,
+          error,
+        });
+        const message =
+          error instanceof Error
+            ? `Error fetching ${statusLabel}: ${error.message}`
+            : `Error fetching ${statusLabel}: ${String(error)}`;
+        onProgress?.(allRates.length, message);
         break;
       }
     }
