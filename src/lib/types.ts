@@ -17,7 +17,11 @@ export type AnimeListExport = {
   anime: AnimeEntry[];
 };
 
-/** @deprecated Use AnimeListExport instead */
+/**
+ * @deprecated This alias is kept for backward compatibility with older code using `MALExport`.
+ * Prefer `AnimeListExport` instead and replace all `MALExport` references with `AnimeListExport`.
+ * This alias may be removed in a future major release.
+ */
 export type MALExport = AnimeListExport;
 
 export type Rating = {

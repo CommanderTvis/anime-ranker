@@ -68,9 +68,19 @@ export const fetchShikimoriUser = async (
       return null;
     }
     const data = await resp.json();
+    if (
+      !data ||
+      typeof data !== "object" ||
+      !("id" in data) ||
+      !("nickname" in data) ||
+      typeof (data as any).id !== "number" ||
+      typeof (data as any).nickname !== "string"
+    ) {
+      return null;
+    }
     return {
-      id: data.id,
-      nickname: data.nickname,
+      id: (data as any).id,
+      nickname: (data as any).nickname,
     };
   } catch {
     return null;
