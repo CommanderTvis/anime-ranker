@@ -1616,13 +1616,31 @@ const App = () => {
                         );
                         const worst = sorted[0];
                         const best = sorted[sorted.length - 1];
+                        // Find a middle sample with a different score than worst and best
                         const midIdx = Math.floor(sorted.length / 2);
-                        const middle = sorted[midIdx];
-                        const samples = [
-                          { ...worst, label: "worst", color: "#c44" },
-                          { ...middle, label: "mid", color: "#888" },
-                          { ...best, label: "best", color: "#4a4" },
-                        ];
+                        let middle = sorted[midIdx];
+                        for (let i = midIdx; i < sorted.length - 1; i++) {
+                          if (
+                            sorted[i].score1to10 !== worst.score1to10 &&
+                            sorted[i].score1to10 !== best.score1to10
+                          ) {
+                            middle = sorted[i];
+                            break;
+                          }
+                        }
+                        // Only show samples with distinct scores
+                        type Sample = (typeof results)[0] & { color: string };
+                        const samples: Sample[] = [];
+                        samples.push({ ...worst, color: "#c44" });
+                        if (
+                          middle.score1to10 !== worst.score1to10 &&
+                          middle.score1to10 !== best.score1to10
+                        ) {
+                          samples.push({ ...middle, color: "#888" });
+                        }
+                        if (best.score1to10 !== worst.score1to10) {
+                          samples.push({ ...best, color: "#4a4" });
+                        }
                         const width = 260;
                         const height = 80;
                         const pad = { l: 25, r: 10, t: 25, b: 18 };
@@ -1674,7 +1692,7 @@ const App = () => {
                                 </text>
                               );
                             })}
-                            {samples.map((s, idx) => {
+                            {samples.map((s) => {
                               const sampleScore = s.score1to10;
                               const x = Math.max(
                                 pad.l + 5,
@@ -1688,15 +1706,12 @@ const App = () => {
                                 s.title.length > 8
                                   ? s.title.slice(0, 7) + "…"
                                   : s.title;
-                              // Offset labels vertically to avoid overlap
-                              const labelOffsets = [-18, -6, -12];
-                              const labelY = y + labelOffsets[idx];
                               return (
                                 <g key={s.animeId}>
                                   <circle cx={x} cy={y} r={3} fill={s.color} />
                                   <text
                                     x={x}
-                                    y={labelY}
+                                    y={y - 6}
                                     className="bell-sample"
                                     fill={s.color}
                                   >
