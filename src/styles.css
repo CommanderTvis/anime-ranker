@@ -136,20 +136,29 @@ h1 {
 
 .user-meta {
     display: flex;
-    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 16px;
     font-size: 13px;
     color: var(--muted);
-    padding: 10px 0;
-    border-bottom: 1px solid var(--stroke);
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--stroke);
 }
 
-.user-meta span {
+.user-meta .source-badge {
+    margin-right: 4px;
+}
+
+.user-meta span:not(.source-badge) {
     display: flex;
+    align-items: center;
     gap: 4px;
 }
 
 .user-meta strong {
     color: var(--ink);
+    font-weight: 600;
 }
 
 .layout {
@@ -649,20 +658,21 @@ details.section .advanced {
 .import-tabs {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .import-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .import-section .section-title {
     margin: 0;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--muted);
 }
 
@@ -671,6 +681,7 @@ details.section .advanced {
     color: var(--muted);
     font-size: 12px;
     position: relative;
+    padding: 4px 0;
 }
 
 .import-divider::before,
@@ -678,7 +689,7 @@ details.section .advanced {
     content: "";
     position: absolute;
     top: 50%;
-    width: calc(50% - 20px);
+    width: calc(50% - 24px);
     height: 1px;
     background: var(--stroke);
 }
@@ -693,60 +704,70 @@ details.section .advanced {
 
 .shikimori-form {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .shikimori-form input[type="text"] {
     flex: 1;
-    padding: 10px 12px;
+    min-width: 0;
+    padding: 12px 14px;
     border: 1px solid var(--stroke);
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 14px;
     font-family: inherit;
-    background: var(--panel);
+    background: var(--bg);
     color: var(--ink);
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .shikimori-form input[type="text"]:focus {
     outline: none;
     border-color: var(--accent);
+    background: var(--panel);
 }
 
 .shikimori-form input[type="text"]::placeholder {
     color: var(--muted);
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 .shikimori-form button {
-    padding: 10px 16px;
+    padding: 12px 20px;
     background: var(--accent);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 14px;
     cursor: pointer;
-    transition: background 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(243, 107, 74, 0.25);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .shikimori-form button:hover:not(:disabled) {
     background: var(--accent-dark);
     transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(243, 107, 74, 0.3);
 }
 
 .shikimori-form button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
 .progress-text {
+    display: block;
+    margin-top: 8px;
     font-size: 12px;
     color: var(--muted);
     font-style: normal;
 }
 
 .error-text {
+    display: block;
+    margin-top: 8px;
     font-size: 12px;
     color: #b4512f;
     font-style: normal;
@@ -755,12 +776,12 @@ details.section .advanced {
 .source-badge {
     background: var(--accent-soft);
     color: var(--accent-dark);
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
 }
 
 @media (max-width: 960px) {
