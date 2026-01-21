@@ -1616,31 +1616,14 @@ const App = () => {
                         );
                         const worst = sorted[0];
                         const best = sorted[sorted.length - 1];
-                        // Find a middle sample with a different score than worst and best
                         const midIdx = Math.floor(sorted.length / 2);
-                        let middle = sorted[midIdx];
-                        for (let i = midIdx; i < sorted.length - 1; i++) {
-                          if (
-                            sorted[i].score1to10 !== worst.score1to10 &&
-                            sorted[i].score1to10 !== best.score1to10
-                          ) {
-                            middle = sorted[i];
-                            break;
-                          }
-                        }
-                        // Only show samples with distinct scores
+                        const middle = sorted[midIdx];
                         type Sample = (typeof results)[0] & { color: string };
-                        const samples: Sample[] = [];
-                        samples.push({ ...worst, color: "#c44" });
-                        if (
-                          middle.score1to10 !== worst.score1to10 &&
-                          middle.score1to10 !== best.score1to10
-                        ) {
-                          samples.push({ ...middle, color: "#888" });
-                        }
-                        if (best.score1to10 !== worst.score1to10) {
-                          samples.push({ ...best, color: "#4a4" });
-                        }
+                        const samples: Sample[] = [
+                          { ...worst, color: "#c44" },
+                          { ...middle, color: "#888" },
+                          { ...best, color: "#4a4" },
+                        ];
                         const width = 260;
                         const height = 80;
                         const pad = { l: 25, r: 10, t: 25, b: 18 };
@@ -1692,34 +1675,55 @@ const App = () => {
                                 </text>
                               );
                             })}
-                            {samples.map((s) => {
-                              const sampleScore = s.score1to10;
-                              const x = Math.max(
-                                pad.l + 5,
-                                Math.min(
-                                  width - pad.r - 5,
-                                  scaleX(sampleScore),
-                                ),
-                              );
-                              const y = scaleY(gaussian(sampleScore));
-                              const shortTitle =
-                                s.title.length > 8
-                                  ? s.title.slice(0, 7) + "…"
-                                  : s.title;
-                              return (
-                                <g key={s.animeId}>
-                                  <circle cx={x} cy={y} r={3} fill={s.color} />
-                                  <text
-                                    x={x}
-                                    y={y - 6}
-                                    className="bell-sample"
-                                    fill={s.color}
-                                  >
-                                    {shortTitle}
-                                  </text>
-                                </g>
-                              );
-                            })}
+                            {(() => {
+                              // Calculate positions first to detect overlaps
+                              const positions = samples.map((s) => {
+                                const sampleScore = s.score1to10;
+                                const x = Math.max(
+                                  pad.l + 5,
+                                  Math.min(
+                                    width - pad.r - 5,
+                                    scaleX(sampleScore),
+                                  ),
+                                );
+                                const y = scaleY(gaussian(sampleScore));
+                                return { ...s, x, y };
+                              });
+                              // Assign label offsets to avoid overlap
+                              const labelYOffsets = positions.map((p, i) => {
+                                let offset = -6;
+                                for (let j = 0; j < i; j++) {
+                                  if (Math.abs(positions[j].x - p.x) < 40) {
+                                    offset -= 12;
+                                  }
+                                }
+                                return offset;
+                              });
+                              return positions.map((s, idx) => {
+                                const shortTitle =
+                                  s.title.length > 8
+                                    ? s.title.slice(0, 7) + "…"
+                                    : s.title;
+                                return (
+                                  <g key={s.animeId}>
+                                    <circle
+                                      cx={s.x}
+                                      cy={s.y}
+                                      r={3}
+                                      fill={s.color}
+                                    />
+                                    <text
+                                      x={s.x}
+                                      y={s.y + labelYOffsets[idx]}
+                                      className="bell-sample"
+                                      fill={s.color}
+                                    >
+                                      {shortTitle}
+                                    </text>
+                                  </g>
+                                );
+                              });
+                            })()}
                           </svg>
                         );
                       })()}
